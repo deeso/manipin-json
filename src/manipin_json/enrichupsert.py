@@ -25,16 +25,17 @@ class EnrichUpsertKeyedValue(UpsertQuery):
             return False, v
         return True, v
 
-    def get_new_value(self, old_value):
+    def get_new_value(self, old_value, value_dict=None):
+        value_dict = self.value_dict if value_dict is None else value_dict
         if not type(old_value) in consts.P_KTYPES:
             return False, None
-        elif old_value in self.value_dict:
-            return True, self.value_dict.get(old_value)
-        elif self.default_value_key in self.value_dict:
-            return True, self.value_dict[self.default_value_key]
+        elif old_value in value_dict:
+            return True, value_dict.get(old_value)
+        elif self.default_value_key in value_dict:
+            return True, value_dict[self.default_value_key]
         return False, None
 
-    def enrich_set(self, json_data, value, condition=None):
+    def enrich_set(self, json_data, value_dict=None, condition=None):
         # check that we can get the value, if not False update
         if not self.check_query(json_data):
             return False
@@ -46,7 +47,7 @@ class EnrichUpsertKeyedValue(UpsertQuery):
         if not valid_key:
             return False
 
-        usable_value, new_value = self.get_new_value(value)
+        usable_value, new_value = self.get_new_value(value, value_dict)
 
         #  if not usable_value, it means a default key and
         #  actual value or value's type from json were not useful
@@ -56,5 +57,5 @@ class EnrichUpsertKeyedValue(UpsertQuery):
             return False
 
         if condition is None:
-            return self.check_set_value(json_data, value)
-        return self.check_set_value(json_data, value, condition=condition)
+            return self.check_set_value(json_data, new_value)
+        return self.check_set_value(json_data, new_value, condition=condition)

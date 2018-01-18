@@ -1,0 +1,12 @@
+[set-vlan-path-id]
+    dpath = "/vlan" # dpath syntax
+    operation = "insert_var" # operation type
+    new_dpath = "/vlan_name"
+    [set-vlan-path-id.var-insert]
+        preproc_lambda = "lambda x: vlan+x['vlan']"
+        [set-vlan-path-id.var-insert.key-mapping]
+            vlan1 = 'admin'
+            vlan2 = 'wireless_trunk'
+            vlan3 = 'wireless_users'
+            vlan4 = 'media_voip'
+            other = 'unknown'

@@ -24,6 +24,8 @@ class UpsertWithKeyedValueDict(UpsertQuery):
 
     def get_new_value(self, old_value, value_dict=None):
         value_dict = self.value_dict if value_dict is None else value_dict
+        if not isinstance(old_value, str):
+            old_value = str(old_value)
         # if not type(old_value) in consts.PP_TYPES:
         #     return False, None
         if old_value in value_dict:

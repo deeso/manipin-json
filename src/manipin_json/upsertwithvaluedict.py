@@ -1,5 +1,5 @@
 from manipin_json.wrapper import UpsertQuery
-from manipin_json import consts
+
 
 class UpsertWithKeyedValueDict(UpsertQuery):
     DEFAULT_VALUE_KEY = "**DEFAULT_VALUE_KEY**"

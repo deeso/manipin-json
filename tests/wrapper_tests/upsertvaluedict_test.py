@@ -13,6 +13,7 @@ kv1 = 'value1'
 kv2 = 'value2'
 kv3 = 'value3'
 dk1 = 'default'
+100 = 'testint'
 '''
 
 
@@ -192,3 +193,22 @@ class EnrichJsonTest(unittest.TestCase):
         self.assertTrue(enrich.check_query(simple_insert_test))
         is_enriched = enrich.enrich_set(simple_insert_test)
         self.assertFalse(is_enriched)
+
+    def test_keyIsInt(self):
+        simple_insert_test = {
+            "a": {
+                "b": 100,
+                "c": {'g': None}
+            }
+        }
+        enrich = self.get_basic_obj()
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
+        self.assertTrue(v == 100)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        found_key, nv = enrich.get_new_value(v)
+        self.assertTrue(nv == 'testint')
+        self.assertTrue(found_key)
+        is_enriched = enrich.enrich_set(simple_insert_test)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        self.assertTrue(is_enriched)

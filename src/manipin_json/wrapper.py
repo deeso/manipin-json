@@ -66,8 +66,8 @@ class BaseQuery(object):
 
         if self.is_parent_none(json_data, dpath_str) and set_if_none:
             pdpath = self.get_parent_dpath(dpath_str)
-            dp_lib.util.set(json_data, pdpath, {})
-            c = dp_lib.util.set(json_data, dpath_str, value)
+            c = dp_lib.util.set(json_data, pdpath, {})
+            dp_lib.util.new(json_data, dpath_str, value)
             vset = c > 0
         elif self.check_query(json_data):
             c = dp_lib.util.set(json_data, dpath_str, value)

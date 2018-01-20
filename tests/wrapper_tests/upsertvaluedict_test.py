@@ -127,6 +127,6 @@ class EnrichJsonTest(unittest.TestCase):
         self.assertTrue(nv == 'value1')
         self.assertTrue(found_key)
         is_enriched = enrich.enrich_set(simple_insert_test)
-        self.assertFalse(is_enriched)
+        self.assertTrue(is_enriched)
         self.assertTrue(enrich.check_query(simple_insert_test))
         print (simple_insert_test)

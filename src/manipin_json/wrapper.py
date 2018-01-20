@@ -18,16 +18,58 @@ class BaseQuery(object):
     def check_query(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
         r = dp_lib.util.search(json_data, self.dpath_query)
-        return len(r) == 0
+        return len(r) > 0
 
     def get_path(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
         r = dp_lib.util.get(json_data, dpath)
         return r
 
-    def set_path(self, json_data, dpath_str, value):
+    def can_set_path(self, json_data, dpath_str):
+        try:
+            return True
+        except:
+            pass
+        return False
+
+    # def set_path(self, json_data, dpath_str, value):
+    #     vset = False
+    #     if not self.can_set_path(json_data, dpath_str):
+    #         return False
+
+    #     if self.check_query(json_data):
+    #         c = dp_lib.util.set(json_data, dpath_str, value)
+    #         vset = c > 0
+    #     else:
+    #         dp_lib.util.new(json_data, dpath_str, value)
+    #         c = dp_lib.util.search(json_data, dpath_str)
+    #         vset = len(c) > 0
+    #     return vset
+
+    def get_parent_dpath(self, dpath):
+        new_path = "/".join(dpath.split('/')[:-1])
+        return new_path
+
+    def is_parent_none(self, json_data, dpath_str):
+        new_path = self.get_parent_dpath(dpath_str)
+        if self.check_query(json_data, new_path):
+            v = dp_lib.util.get(json_data, new_path)
+            return v is None
+        return False
+
+    def set_path(self, json_data, dpath_str, value,
+                 set_if_none=True):
         vset = False
-        if self.check_query(json_data):
+        if not self.can_set_path(json_data, dpath_str) and \
+           not self.is_parent_none(json_data, dpath_str):
+            return False
+
+        if self.is_parent_none(json_data, dpath_str) and set_if_none:
+            pdpath = self.get_parent_dpath(dpath_str)
+            dp_lib.util.set(json_data, pdpath, {})
+            c = dp_lib.util.set(json_data, dpath_str, value)
+            vset = c > 0
+        elif self.check_query(json_data):
             c = dp_lib.util.set(json_data, dpath_str, value)
             vset = c > 0
         else:

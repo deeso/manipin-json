@@ -1,4 +1,5 @@
 from wrapper_tests.upsert_test import *
+from wrapper_tests.upsertvaluedict_test import *
 import os
 import logging
 import sys

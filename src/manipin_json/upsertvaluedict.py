@@ -1,9 +1,7 @@
-from wrapper import UpsertQuery
-from wrappter import consts
+from manipin_json.wrapper import UpsertQuery
+from manipin_json import consts
 
-
-class EnrichUpsertKeyedValue(UpsertQuery):
-
+class EnrichUpsertKeyedValueDict(UpsertQuery):
     DEFAULT_VALUE_KEY = "**DEFAULT_VALUE_KEY**"
 
     def __init__(self, name, dpath_check, dpath_upsert,
@@ -11,28 +9,29 @@ class EnrichUpsertKeyedValue(UpsertQuery):
                  default_value_key=DEFAULT_VALUE_KEY):
 
         arglist = (name, dpath_check, dpath_upsert)
-        super(EnrichUpsertKeyedValue, self).__init__(*arglist)
+        super(EnrichUpsertKeyedValueDict, self).__init__(*arglist)
         self.dpath_extract_key = dpath_extract_key
         self.value_dict = value_dict
         self.default_value_key = default_value_key
 
     def extract_value(self, json_data):
         try:
-            v = self.get_path(json_data, self.dpath)
+            v = self.get_path(json_data, self.dpath_extract_key)
+            if not type(v) in consts.PP_TYPES:
+                return False, v
+            return True, v
         except:
-            v = None
-        if not type(v) in consts.P_KTYPES:
-            return False, v
-        return True, v
+            raise
+            return False, None
 
     def get_new_value(self, old_value, value_dict=None):
         value_dict = self.value_dict if value_dict is None else value_dict
-        if not type(old_value) in consts.P_KTYPES:
+        if not type(old_value) in consts.PP_TYPES:
             return False, None
         elif old_value in value_dict:
             return True, value_dict.get(old_value)
         elif self.default_value_key in value_dict:
-            return True, value_dict[self.default_value_key]
+            return False, value_dict[self.default_value_key]
         return False, None
 
     def enrich_set(self, json_data, value_dict=None, condition=None):
@@ -59,3 +58,17 @@ class EnrichUpsertKeyedValue(UpsertQuery):
         if condition is None:
             return self.check_set_value(json_data, new_value)
         return self.check_set_value(json_data, new_value, condition=condition)
+
+    @classmethod
+    def parse_toml(cls, toml_dict):
+        name = toml_dict.get('name', None)
+        dpath_check = toml_dict.get('dpath-check', None)
+        dpath_upsert = toml_dict.get('dpath-upsert', None)
+        dpath_extract_key = toml_dict.get('dpath-extract-key', None)
+        value_dict = toml_dict.get('value-dict', {})
+        default_value_key = toml_dict.get('default-value-key',
+                                          cls.DEFAULT_VALUE_KEY)
+
+        return cls(name, dpath_check, dpath_upsert,
+                   dpath_extract_key, value_dict,
+                   default_value_key)

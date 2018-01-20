@@ -1,7 +1,7 @@
 from manipin_json.wrapper import UpsertQuery
 from manipin_json import consts
 
-class EnrichUpsertKeyedValueDict(UpsertQuery):
+class UpsertWithKeyedValueDict(UpsertQuery):
     DEFAULT_VALUE_KEY = "**DEFAULT_VALUE_KEY**"
 
     def __init__(self, name, dpath_check, dpath_upsert,
@@ -9,7 +9,7 @@ class EnrichUpsertKeyedValueDict(UpsertQuery):
                  default_value_key=DEFAULT_VALUE_KEY):
 
         arglist = (name, dpath_check, dpath_upsert)
-        super(EnrichUpsertKeyedValueDict, self).__init__(*arglist)
+        super(UpsertWithKeyedValueDict, self).__init__(*arglist)
         self.dpath_extract_key = dpath_extract_key
         self.value_dict = value_dict
         self.default_value_key = default_value_key

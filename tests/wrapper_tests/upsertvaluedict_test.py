@@ -1,4 +1,4 @@
-from manipin_json.upsertvaluedict import EnrichUpsertKeyedValueDict
+from manipin_json.upsertwithvaluedict import UpsertWithKeyedValueDict
 import unittest
 import toml
 
@@ -16,26 +16,13 @@ dk1 = 'default'
 '''
 
 
-
-
-
-
-
-simple_insert_test = {
-    "a": {
-        "b": 0,
-        "c": {'g': None}
-    }
-}
-
-
 class EnrichJsonTest(unittest.TestCase):
 
     def get_toml_dict(self):
         return toml.loads(simple_sample_toml)
 
     def get_basic_obj(self):
-        enrich = EnrichUpsertKeyedValueDict.parse_toml(self.get_toml_dict())
+        enrich = UpsertWithKeyedValueDict.parse_toml(self.get_toml_dict())
         self.assertTrue(enrich.name == 'upsert-enrich-test')
         self.assertTrue(enrich.dpath_query == 'a/c')
         self.assertTrue(enrich.dpath_upsert == 'a/c/g')

@@ -17,34 +17,28 @@ class BaseQuery(object):
 
     def check_query(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
-        r = dp_lib.util.search(json_data, self.dpath_query)
+        r = dp_lib.util.search(json_data, dpath)
         return len(r) > 0
 
     def get_path(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
-        r = dp_lib.util.get(json_data, dpath)
-        return r
+        try:
+            r = dp_lib.util.get(json_data, dpath)
+            return r
+        except:
+            return None
 
     def can_set_path(self, json_data, dpath_str):
         try:
-            return True
+            r = len(dp_lib.util.search(json_data, dpath_str)) > 0
+            return r
         except:
             pass
         return False
 
-    # def set_path(self, json_data, dpath_str, value):
-    #     vset = False
-    #     if not self.can_set_path(json_data, dpath_str):
-    #         return False
-
-    #     if self.check_query(json_data):
-    #         c = dp_lib.util.set(json_data, dpath_str, value)
-    #         vset = c > 0
-    #     else:
-    #         dp_lib.util.new(json_data, dpath_str, value)
-    #         c = dp_lib.util.search(json_data, dpath_str)
-    #         vset = len(c) > 0
-    #     return vset
+    def can_set_parent_path(self, json_data, dpath_str):
+        pdpath = self.get_parent_dpath(dpath_str)
+        return self.can_set_path(json_data, pdpath)
 
     def get_parent_dpath(self, dpath):
         new_path = "/".join(dpath.split('/')[:-1])
@@ -57,25 +51,63 @@ class BaseQuery(object):
             return v is None
         return False
 
+    def is_parent_bytes(self, json_data, dpath_str):
+        new_path = self.get_parent_dpath(dpath_str)
+        if self.check_query(json_data, new_path):
+            v = dp_lib.util.get(json_data, new_path)
+            return v is not None and isinstance(v, bytes)
+        return False
+
+    def is_parent_list(self, json_data, dpath_str):
+        new_path = self.get_parent_dpath(dpath_str)
+        if self.check_query(json_data, new_path):
+            v = dp_lib.util.get(json_data, new_path)
+            return v is not None and isinstance(v, list)
+        return False
+
+    def is_parent_dict(self, json_data, dpath_str):
+        new_path = self.get_parent_dpath(dpath_str)
+        if self.check_query(json_data, new_path):
+            v = dp_lib.util.get(json_data, new_path)
+            return v is not None and isinstance(v, dict)
+        return False
+
+    def is_parent_str(self, json_data, dpath_str):
+        new_path = self.get_parent_dpath(dpath_str)
+        if self.check_query(json_data, new_path):
+            v = dp_lib.util.get(json_data, new_path)
+            return v is not None and isinstance(v, str)
+        return False
+
+    def is_parent_int(self, json_data, dpath_str):
+        new_path = self.get_parent_dpath(dpath_str)
+        if self.check_query(json_data, new_path):
+            v = dp_lib.util.get(json_data, new_path)
+            return v is not None and isinstance(v, int)
+        return False
+
     def set_path(self, json_data, dpath_str, value,
-                 set_if_none=True):
+                 replace=True):
         vset = False
-        if not self.can_set_path(json_data, dpath_str) and \
-           not self.is_parent_none(json_data, dpath_str):
+        if not self.can_set_parent_path(json_data, dpath_str):
+            print ("check failed")
             return False
 
-        if self.is_parent_none(json_data, dpath_str) and set_if_none:
+        if self.is_parent_dict(json_data, dpath_str) and \
+           not self.check_query(json_data, dpath_str):
+            dp_lib.util.new(json_data, dpath_str, value)
+            vset = self.check_query(json_data, dpath_str)
+        elif self.is_parent_dict(json_data, dpath_str):
+            c = dp_lib.util.set(json_data, dpath_str, value)
+            vset = c > 0
+        elif not self.is_parent_dict(json_data, dpath_str) and replace:
             pdpath = self.get_parent_dpath(dpath_str)
             c = dp_lib.util.set(json_data, pdpath, {})
             dp_lib.util.new(json_data, dpath_str, value)
-            vset = c > 0
-        elif self.check_query(json_data):
-            c = dp_lib.util.set(json_data, dpath_str, value)
-            vset = c > 0
+            vset = self.check_query(json_data, dpath_str)
         else:
             dp_lib.util.new(json_data, dpath_str, value)
-            c = dp_lib.util.search(json_data, dpath_str)
-            vset = len(c) > 0
+            vset = self.check_query(json_data, dpath_str)
         return vset
 
     def query_update(self, json_data, set_dpath,

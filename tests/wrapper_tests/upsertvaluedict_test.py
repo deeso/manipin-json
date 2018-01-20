@@ -7,7 +7,7 @@ name = 'upsert-enrich-test'
 dpath-check = 'a/c'
 dpath-upsert =  'a/c/g'
 dpath-extract-key = 'a/b'
-default-value = 'dk1'
+default-value-key = 'dk1'
 [value-dict]
 kv1 = 'value1'
 kv2 = 'value2'
@@ -17,33 +17,9 @@ dk1 = 'default'
 
 
 
-simple_insert_test = {
-    "a": {
-        "b": "kv1",
-        "c": 0
-    }
-}
 
-simple_insert_test = {
-    "a": {
-        "b": "kv1",
-        "c": {}
-    }
-}
 
-simple_insert_test = {
-    "a": {
-        "b": "kv1",
-        "c": {'g': None}
-    }
-}
 
-simple_insert_test = {
-    "a": {
-        "b": None,
-        "c": {'g': None}
-    }
-}
 
 simple_insert_test = {
     "a": {
@@ -73,8 +49,8 @@ class EnrichJsonTest(unittest.TestCase):
         }
 
         enrich = self.get_basic_obj()
-        found, v = enrich.extract_value(simple_insert_test)
-        self.assertTrue(found)
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
         self.assertTrue(v == 'kv1')
         self.assertFalse(enrich.check_query(simple_insert_test))
         found_key, nv = enrich.get_new_value(v)
@@ -95,8 +71,8 @@ class EnrichJsonTest(unittest.TestCase):
         }
 
         enrich = self.get_basic_obj()
-        found, v = enrich.extract_value(simple_insert_test)
-        self.assertTrue(found)
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
         self.assertTrue(v == 'kv1')
         self.assertFalse(enrich.check_query(simple_insert_test))
         found_key, nv = enrich.get_new_value(v)
@@ -119,8 +95,8 @@ class EnrichJsonTest(unittest.TestCase):
         }
 
         enrich = self.get_basic_obj()
-        found, v = enrich.extract_value(simple_insert_test)
-        self.assertTrue(found)
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
         self.assertTrue(v == 'kv1')
         self.assertTrue(enrich.check_query(simple_insert_test))
         found_key, nv = enrich.get_new_value(v)
@@ -129,4 +105,103 @@ class EnrichJsonTest(unittest.TestCase):
         is_enriched = enrich.enrich_set(simple_insert_test)
         self.assertTrue(is_enriched)
         self.assertTrue(enrich.check_query(simple_insert_test))
-        print (simple_insert_test)
+
+    def test_cisInt(self):
+        '''
+        should not enrich json_data
+        check value exists and can be extracted from json
+        '''
+        simple_insert_test = {
+            "a": {
+                "b": "kv1",
+                "c": 0
+            }
+        }
+
+        enrich = self.get_basic_obj()
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
+        self.assertTrue(v == 'kv1')
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        found_key, nv = enrich.get_new_value(v)
+        self.assertTrue(nv == 'value1')
+        self.assertTrue(found_key)
+        is_enriched = enrich.enrich_set(simple_insert_test)
+        self.assertTrue(is_enriched)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+
+    def test_cisDict(self):
+        '''
+        should not enrich json_data
+        check value exists and can be extracted from json
+        '''
+        simple_insert_test = {
+            "a": {
+                "b": "kv1",
+                "c": {}
+            }
+        }
+
+        enrich = self.get_basic_obj()
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
+        self.assertTrue(v == 'kv1')
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        found_key, nv = enrich.get_new_value(v)
+        self.assertTrue(nv == 'value1')
+        self.assertTrue(found_key)
+        is_enriched = enrich.enrich_set(simple_insert_test)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        self.assertTrue(is_enriched)
+
+    def test_gisNone(self):
+        simple_insert_test = {
+            "a": {
+                "b": "kv1",
+                "c": {'g': None}
+            }
+        }
+        enrich = self.get_basic_obj()
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
+        self.assertTrue(v == 'kv1')
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        found_key, nv = enrich.get_new_value(v)
+        self.assertTrue(nv == 'value1')
+        self.assertTrue(found_key)
+        is_enriched = enrich.enrich_set(simple_insert_test)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        self.assertTrue(is_enriched)
+
+    def test_keyValueisNone(self):
+        simple_insert_test = {
+            "a": {
+                "b": None,
+                "c": {'g': None}
+            }
+        }
+        enrich = self.get_basic_obj()
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertTrue(valid_key)
+        self.assertTrue(v is None)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        found_key, nv = enrich.get_new_value(v)
+        self.assertTrue(nv == 'default')
+        self.assertFalse(found_key)
+        is_enriched = enrich.enrich_set(simple_insert_test)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        self.assertTrue(is_enriched)
+
+    def test_keyValueNotPresent(self):
+        simple_insert_test = {
+            "a": {
+                "c": {'f': None}
+            }
+        }
+        enrich = self.get_basic_obj()
+        valid_key, v = enrich.extract_value(simple_insert_test)
+        self.assertFalse(valid_key)
+        self.assertTrue(v is None)
+        self.assertTrue(enrich.check_query(simple_insert_test))
+        is_enriched = enrich.enrich_set(simple_insert_test)
+        self.assertFalse(is_enriched)

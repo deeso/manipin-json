@@ -15,7 +15,7 @@ A_TYPES = P_TYPES + C_TYPES
 
 # python types allowed
 CP_TYPES = [type({}), type(set()), type([])]
-PP_TYPES = [type(True), type(""), type(b""), type(0), type(None)]
+PP_TYPES = [type(True), type(""), type(b""), type(0), type(None), None]
 AP_TYPES = CP_TYPES + PP_TYPES
 
 # python json type mapping

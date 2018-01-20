@@ -17,22 +17,20 @@ class EnrichUpsertKeyedValueDict(UpsertQuery):
     def extract_value(self, json_data):
         try:
             v = self.get_path(json_data, self.dpath_extract_key)
-            if not type(v) in consts.PP_TYPES:
-                return False, v
-            return True, v
+            return self.check_query(json_data, self.dpath_extract_key),  v
         except:
             raise
             return False, None
 
     def get_new_value(self, old_value, value_dict=None):
         value_dict = self.value_dict if value_dict is None else value_dict
-        if not type(old_value) in consts.PP_TYPES:
-            return False, None
-        elif old_value in value_dict:
+        # if not type(old_value) in consts.PP_TYPES:
+        #     return False, None
+        if old_value in value_dict:
             return True, value_dict.get(old_value)
         elif self.default_value_key in value_dict:
-            return False, value_dict[self.default_value_key]
-        return False, None
+            return False, value_dict.get(self.default_value_key, None)
+        return None, None
 
     def enrich_set(self, json_data, value_dict=None, condition=None):
         # check that we can get the value, if not False update
@@ -46,13 +44,13 @@ class EnrichUpsertKeyedValueDict(UpsertQuery):
         if not valid_key:
             return False
 
-        usable_value, new_value = self.get_new_value(value, value_dict)
+        found_value, new_value = self.get_new_value(value, value_dict)
 
-        #  if not usable_value, it means a default key and
+        #  if not found_value, it means a default key and
         #  actual value or value's type from json were not useful
         #  for extracting a new key.  Nothing to do but fail
 
-        if not usable_value:
+        if found_value is None:
             return False
 
         if condition is None:

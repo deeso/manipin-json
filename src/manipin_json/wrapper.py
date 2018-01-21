@@ -19,11 +19,15 @@ class BaseQuery(object):
 
     def check_query(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
+        if dpath == '/' or len(dpath) == 0:
+            return True
         r = dp_lib.util.search(json_data, dpath)
         return len(r) > 0
 
     def get_path(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
+        if dpath == '/' or len(dpath) == 0:
+            return json_data
         try:
             r = dp_lib.util.get(json_data, dpath)
             return r
@@ -31,6 +35,8 @@ class BaseQuery(object):
             return None
 
     def can_set_path(self, json_data, dpath_str):
+        if dpath_str == '/' or len(dpath_str) == 0:
+            return True
         try:
             r = len(dp_lib.util.search(json_data, dpath_str)) > 0
             return r
@@ -53,42 +59,42 @@ class BaseQuery(object):
     def is_parent_none(self, json_data, dpath_str):
         new_path = self.get_parent_dpath(dpath_str)
         if self.check_query(json_data, new_path):
-            v = dp_lib.util.get(json_data, new_path)
+            v = self.get_path(json_data, new_path)
             return v is None
         return False
 
     def is_parent_bytes(self, json_data, dpath_str):
         new_path = self.get_parent_dpath(dpath_str)
         if self.check_query(json_data, new_path):
-            v = dp_lib.util.get(json_data, new_path)
+            v = self.get_path(json_data, new_path)
             return v is not None and isinstance(v, bytes)
         return False
 
     def is_parent_list(self, json_data, dpath_str):
         new_path = self.get_parent_dpath(dpath_str)
         if self.check_query(json_data, new_path):
-            v = dp_lib.util.get(json_data, new_path)
+            v = self.get_path(json_data, new_path)
             return v is not None and isinstance(v, list)
         return False
 
     def is_parent_dict(self, json_data, dpath_str):
         new_path = self.get_parent_dpath(dpath_str)
         if self.check_query(json_data, new_path):
-            v = dp_lib.util.get(json_data, new_path)
+            v = self.get_path(json_data, new_path)
             return v is not None and isinstance(v, dict)
         return False
 
     def is_parent_str(self, json_data, dpath_str):
         new_path = self.get_parent_dpath(dpath_str)
         if self.check_query(json_data, new_path):
-            v = dp_lib.util.get(json_data, new_path)
+            v = self.get_path(json_data, new_path)
             return v is not None and isinstance(v, str)
         return False
 
     def is_parent_int(self, json_data, dpath_str):
         new_path = self.get_parent_dpath(dpath_str)
         if self.check_query(json_data, new_path):
-            v = dp_lib.util.get(json_data, new_path)
+            v = self.get_path(json_data, new_path)
             return v is not None and isinstance(v, int)
         return False
 

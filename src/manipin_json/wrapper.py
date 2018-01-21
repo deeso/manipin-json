@@ -14,6 +14,8 @@ class BaseQuery(object):
     def __init__(self, name, dpath_query):
         self.dpath_query = dpath_query
         self.name = name
+        if self.dpath_query.find('/') != 0:
+            self.dpath_query = '/' + self.dpath_query
 
     def check_query(self, json_data, dpath=None):
         dpath = self.dpath_query if dpath is None else dpath
@@ -42,6 +44,8 @@ class BaseQuery(object):
 
     def get_parent_dpath(self, dpath):
         new_path = "/".join(dpath.split('/')[:-1])
+        if len(new_path == 0):
+            return '/'
         return new_path
 
     def is_parent_none(self, json_data, dpath_str):
@@ -160,6 +164,9 @@ class UpsertQuery(BaseQuery):
         self.dpath_upsert = dpath_search
         if dpath_upsert is not None:
             self.dpath_upsert = dpath_upsert
+
+        if self.dpath_upsert.find('/') != 0:
+            self.dpath_upsert = '/' + self.dpath_upsert
         self.default_value = default_value
 
     def check_set_value(self, json_data, value, condition=None):

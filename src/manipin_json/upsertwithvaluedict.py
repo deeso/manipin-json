@@ -11,6 +11,8 @@ class UpsertWithKeyedValueDict(UpsertQuery):
         arglist = (name, dpath_check, dpath_upsert)
         super(UpsertWithKeyedValueDict, self).__init__(*arglist)
         self.dpath_extract_key = dpath_extract_key
+        if self.dpath_extract_key.find('/') != 0:
+            self.dpath_extract_key = '/' + self.dpath_extract_key
         self.value_dict = value_dict
         self.default_value_key = default_value_key
 

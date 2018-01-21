@@ -43,8 +43,10 @@ class BaseQuery(object):
         return self.can_set_path(json_data, pdpath)
 
     def get_parent_dpath(self, dpath):
+        if dpath.find('/') != 0:
+            dpath = '/' + dpath
         new_path = "/".join(dpath.split('/')[:-1])
-        if len(new_path == 0):
+        if len(new_path) == 0:
             return '/'
         return new_path
 
